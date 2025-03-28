@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cricket Scoreboard</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Cricket Scoreboard</h1>
+        </header>
+
+        <div class="scoreboard">
+            <div class="team team1">
+                <h2 id="team1-name">Team 1</h2>
+                <div class="score-container">
+                    <div class="main-score">
+                        <span id="team1-runs">0</span>/<span id="team1-wickets">0</span>
+                    </div>
+                    <div class="overs">
+                        Overs: <span id="team1-overs">0.0</span>
+                    </div>
+                    <div class="extras">
+                        Extras: <span id="team1-extras">0</span>
+                    </div>
+                </div>
+                <div class="controls">
+                    <button onclick="updateScore(1, 'runs', 1)">+1 Run</button>
+                    <button onclick="updateScore(1, 'runs', 4)">+4 Runs</button>
+                    <button onclick="updateScore(1, 'runs', 6)">+6 Runs</button>
+                    <button onclick="updateScore(1, 'wickets', 1)">+1 Wicket</button>
+                    <button onclick="updateScore(1, 'extras', 1)">+1 Extra</button>
+                    <button onclick="updateOvers(1, 0.1)">+0.1 Over</button>
+                </div>
+            </div>
+
+            <div class="team team2">
+                <h2 id="team2-name">Team 2</h2>
+                <div class="score-container">
+                    <div class="main-score">
+                        <span id="team2-runs">0</span>/<span id="team2-wickets">0</span>
+                    </div>
+                    <div class="overs">
+                        Overs: <span id="team2-overs">0.0</span>
+                    </div>
+                    <div class="extras">
+                        Extras: <span id="team2-extras">0</span>
+                    </div>
+                </div>
+                <div class="controls">
+                    <button onclick="updateScore(2, 'runs', 1)">+1 Run</button>
+                    <button onclick="updateScore(2, 'runs', 4)">+4 Runs</button>
+                    <button onclick="updateScore(2, 'runs', 6)">+6 Runs</button>
+                    <button onclick="updateScore(2, 'wickets', 1)">+1 Wicket</button>
+                    <button onclick="updateScore(2, 'extras', 1)">+1 Extra</button>
+                    <button onclick="updateOvers(2, 0.1)">+0.1 Over</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="match-controls">
+            <button onclick="resetScores()">Reset Scores</button>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html> 

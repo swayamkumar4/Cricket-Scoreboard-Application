@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cricket Scoreboard - Admin Login</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .login-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 30px;
+            max-width: 400px;
+            margin: 100px auto;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .login-form {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .form-group label {
+            color: #333;
+            font-weight: bold;
+        }
+
+        .form-group input {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1em;
+        }
+
+        .login-button {
+            background: #1a2a6c;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1.1em;
+            transition: all 0.3s ease;
+        }
+
+        .login-button:hover {
+            background: #2a3a7c;
+            transform: translateY(-2px);
+        }
+
+        .login-button:disabled {
+            background: #cccccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .error-message {
+            color: #b21f1f;
+            text-align: center;
+            display: none;
+            padding: 10px;
+            background-color: rgba(178, 31, 31, 0.1);
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin-bottom: 10px;
+            color: #1a2a6c;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #1a2a6c;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+            vertical-align: middle;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Cricket Scoreboard Admin</h1>
+        </header>
+
+        <div class="login-container">
+            <h2 style="text-align: center; margin-bottom: 20px;">Admin Login</h2>
+            <form class="login-form" id="loginForm">
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" name="username" required autocomplete="username">
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" required autocomplete="current-password">
+                </div>
+                <div class="loading" id="loadingMessage">
+                    <div class="spinner"></div>
+                    Logging in...
+                </div>
+                <p class="error-message" id="errorMessage"></p>
+                <button type="submit" class="login-button" id="loginButton">Login</button>
+            </form>
+            <p style="text-align: center; margin-top: 20px;">
+                <a href="index.html" style="color: #1a2a6c; text-decoration: none;">Back to Scoreboard</a>
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // Function to check if server is running
+        async function checkServer() {
+            try {
+                const response = await fetch('http://localhost:8080/api/scores', {
+                    method: 'GET',
+                    mode: 'cors',
+                    cache: 'no-cache'
+                });
+                
+                // Check if we got a valid response
+                if (response.ok) {
+                    return true;
+                }
+                console.error('Server check failed with status:', response.status);
+                return false;
+            } catch (error) {
+                console.error('Server check error:', error);
+                return false;
+            }
+        }
+
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value.trim();
+            const errorMessage = document.getElementById('errorMessage');
+            const loadingMessage = document.getElementById('loadingMessage');
+            const loginButton = document.getElementById('loginButton');
+            
+            if (!username || !password) {
+                errorMessage.textContent = 'Please enter both username and password';
+                errorMessage.style.display = 'block';
+                return;
+            }
+
+            // Show loading state
+            loadingMessage.style.display = 'block';
+            errorMessage.style.display = 'none';
+            loginButton.disabled = true;
+
+            try {
+                // First check if server is running
+                const serverRunning = await checkServer();
+                if (!serverRunning) {
+                    throw new Error('Server not running');
+                }
+
+                // Log what we're sending
+                const authString = 'Basic ' + btoa(username + ':' + password);
+                console.log('Sending auth:', authString);
+                console.log('Encoded credentials:', btoa(username + ':' + password));
+
+                const response = await fetch('http://localhost:8080/api/auth', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': authString,
+                        'Content-Type': 'application/json'
+                    },
+                    mode: 'cors',
+                    credentials: 'omit'
+                });
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('Server response:', errorText);
+                    throw new Error('Server returned error: ' + response.status);
+                }
+
+                const data = await response.json();
+                
+                if (data.isAdmin) {
+                    // Store admin token
+                    localStorage.setItem('adminAuth', btoa(username + ':' + password));
+                    // Redirect to index page
+                    window.location.href = 'index.html';
+                } else {
+                    errorMessage.textContent = 'Invalid username or password';
+                    errorMessage.style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                if (error.message === 'Server not running') {
+                    errorMessage.textContent = 'Connection failed. Please make sure the server is running on port 8080.';
+                } else {
+                    errorMessage.textContent = 'Connection error. Please try again.';
+                }
+                errorMessage.style.display = 'block';
+            } finally {
+                // Hide loading state
+                loadingMessage.style.display = 'none';
+                loginButton.disabled = false;
+            }
+        });
+
+        // Check server status on page load
+        window.addEventListener('load', async () => {
+            const serverRunning = await checkServer();
+            if (!serverRunning) {
+                const errorMessage = document.getElementById('errorMessage');
+                errorMessage.textContent = 'Server is not running. Please start the server first.';
+                errorMessage.style.display = 'block';
+                document.getElementById('loginButton').disabled = true;
+            }
+        });
+    </script>
+</body>
+</html> 
